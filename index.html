@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>VIVERSE Blog Converter v1.5</title>
+
   <style>
     :root {
       --primary: #78D5F1;
@@ -79,7 +81,9 @@
   </style>
 </head>
 <body>
+
   <header>VIVERSE Blog Converter v1.5</header>
+
   <main>
     <div id="input" class="editor" contenteditable placeholder="Paste original content here..."></div>
     <div class="buttons">
@@ -90,24 +94,29 @@
     <div id="debug"></div>
   </main>
   <script>
+
     var debugEl = document.getElementById('debug');
     function debug(msg) {
       if (window.console) console.log(msg);
+
       if (debugEl) {
         debugEl.textContent += msg + '\n';
         debugEl.scrollTop = debugEl.scrollHeight;
       }
+
     }
 
     function convert() {
       debug('Convert started');
       var rawHtml = document.getElementById('input').innerHTML || '';
+
       debug('Raw length: ' + rawHtml.length);
       if (!rawHtml.trim()) {
         debug('Empty input');
         document.getElementById('output').innerHTML = '';
         return;
       }
+
 
       var parser = new DOMParser();
       var doc = parser.parseFromString(rawHtml, 'text/html');
@@ -171,6 +180,7 @@
       debug('Wrapped stray text');
 
       var styleMap = {
+
         H1: 'color:#78D5F1;font-size:28px;margin:24px 0 20px 0;line-height:1.2;',
         H2: 'color:#78D5F1;font-size:28px;margin:24px 0 20px 0;line-height:1.2;',
         H3: 'color:#FFFFFF;font-size:22px;font-weight:bold;margin:20px 0 16px 0;line-height:1.2;',
@@ -184,6 +194,7 @@
         TD:   'border:1px solid #78D5F1;padding:8px;color:#FFFFFF;font-size:16px;',
         TH:   'border:1px solid #78D5F1;padding:8px;color:#000000;font-size:16px;background:#78D5F1;font-weight:bold;'
       };
+
       for (var tag in styleMap) {
         var els = doc.querySelectorAll(tag);
         for (var s = 0; s < els.length; s++) {
@@ -259,6 +270,7 @@
 
     document.getElementById('convertBtn').addEventListener('click', convert);
     document.getElementById('copyBtn').addEventListener('click', copyOutput);
+
   </script>
 </body>
 </html>
