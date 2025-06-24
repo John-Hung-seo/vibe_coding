@@ -1,6 +1,6 @@
-
-# VIVE Blog Converter v1.3
-=======
+# VIVE Blog Converter v1.4
+Version 1.4 improves clipboard handling for images and auto-scrolls the debug
+panel when new messages appear.
 
 
 This repository contains a simple HTML page for converting blog content to a VIVERSE-friendly format.

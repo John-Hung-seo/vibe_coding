@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <title>VIVERSE Blog Converter v1.4</title>
   <title>VIVERSE Blog Converter v1.3</title>
   <style>
     :root {
@@ -55,7 +55,7 @@
       gap: 8px;
       margin-bottom: 12px;
     }
-    button {
+  <header>VIVERSE Blog Converter v1.4</header>
       padding: 10px 16px;
       font-size: 16px;
       border: none;
@@ -169,16 +169,14 @@
         LI: 'color:#FFFFFF;font-size:18px;margin-bottom:4px;line-height:1.5;',
         TABLE:'border-collapse:collapse;width:100%;color:#FFFFFF;margin:16px 0;',
         TD:   'border:1px solid #78D5F1;padding:8px;color:#FFFFFF;font-size:16px;',
-        TH:   'border:1px solid #78D5F1;padding:8px;color:#000000;font-size:16px;background:#78D5F1;font-weight:bold;'
-      };
-      Object.entries(styleMap).forEach(([tag, css])=>{
-        doc.querySelectorAll(tag).forEach(e => e.style.cssText += css);
-      });
-      debug('Applied styles');
-
-      const imgs = Array.from(doc.querySelectorAll('img'));
-      for(const img of imgs) {
-        const src = img.src;
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([document.getElementById('output').innerHTML], {type:'text/html'}),
+            'text/plain': new Blob([document.getElementById('output').textContent], {type:'text/plain'})
+          })
+        ]);
+        debug('Copied to clipboard');
         if(src && !src.startsWith('data:')){
           try{
             const blob = await fetch(src).then(r=>r.blob());
