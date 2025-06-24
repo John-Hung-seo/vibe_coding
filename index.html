@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <title>VIVERSE Blog Converter v1.3</title>
   <style>
     :root {
       --primary: #78D5F1;
@@ -79,7 +79,10 @@
   </style>
 </head>
 <body>
-
+      if (debugEl) {
+        debugEl.textContent += msg + '\n';
+        debugEl.scrollTop = debugEl.scrollHeight;
+      }
   <main>
     <div id="input" class="editor" contenteditable placeholder="Paste original content here..."></div>
     <div class="buttons">
