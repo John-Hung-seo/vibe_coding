@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIVERSE Blog Converter v1.3</title>
+  <style>
+    :root {
+      --primary: #78D5F1;
+      --bg: #0A0A0A;
+      --text: #FFFFFF;
+      --link: #00B3E3;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background: var(--primary);
+      width: 100%;
+      padding: 16px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    main {
+      width: 90%;
+      max-width: 800px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .editor {
+      width: 100%;
+      min-height: 200px;
+      border: 2px solid var(--primary);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 12px;
+      background: #fff;
+      color: #000;
+      overflow-y: auto;
+    }
+    .editor[contenteditable] {
+      outline: none;
+    }
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #convertBtn { background: var(--link); color: var(--text); }
+    #copyBtn { background: var(--primary); color: var(--text); }
+    #debug {
+      height: 100px;
+      overflow-y: auto;
+      background: #222;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 12px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 8px;
+      white-space: pre-wrap;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>VIVERSE Blog Converter v1.2</header>
+  <main>
+    <div id="input" class="editor" contenteditable placeholder="Paste original content here..."></div>
+    <div class="buttons">
+      <button id="convertBtn">Convert to VIVERSE</button>
+      <button id="copyBtn">Copy to Clipboard</button>
+    </div>
+    <div id="output" class="editor" contenteditable placeholder="Converted content will appear here..."></div>
+    <div id="debug"></div>
+  </main>
+  <script>
+    const debugEl = document.getElementById('debug');
+    function debug(msg) {
+      console.log(msg);
+      if (debugEl) {
+        debugEl.textContent += msg + '\n';
+        debugEl.scrollTop = debugEl.scrollHeight;
+      }
+    }
+    async function convert() {
+      debug('Convert started');
+      const rawHtml = document.getElementById('input').innerHTML || '';
+      debug('Raw length: ' + rawHtml.length);
+      if (!rawHtml.trim()) {
+        debug('Empty input');
+        document.getElementById('output').innerHTML = '';
+        return;
+      }
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawHtml, 'text/html');
+      debug('Parsed HTML');
+
+      const removeUnwanted = el => {
+        ['video','iframe','embed','object','script','style','noscript'].forEach(sel => {
+          doc.body.querySelectorAll(sel).forEach(node => { node.remove(); debug('Removed ' + sel); });
+        });
+      };
+      removeUnwanted(doc.body);
+
+      const allowed = ['H1','H2','H3','H4','H5','H6','P','BR','A','IMG','UL','OL','LI','TABLE','THEAD','TBODY','TR','TD','TH'];
+      (function clean(node) {
+        Array.from(node.childNodes).forEach(child => {
+          if (child.nodeType === 1) {
+            const tag = child.tagName;
+            debug('Visiting ' + tag);
+            const keep = ['src','href','alt','width','height'];
+            Array.from(child.attributes).forEach(a=>{ if(!keep.includes(a.name)) child.removeAttribute(a.name); });
+            if ((tag==='SPAN'||tag==='FONT'||tag==='DIV') && !allowed.includes(tag)) {
+              while(child.firstChild) child.parentNode.insertBefore(child.firstChild, child);
+              child.remove(); return;
+            }
+            if (!allowed.includes(tag)) {
+              while(child.firstChild) child.parentNode.insertBefore(child.firstChild, child);
+              child.remove(); return;
+            }
+          }
+          clean(child);
+        });
+      })(doc.body);
+      debug('Cleaned HTML');
+
+      Array.from(doc.body.childNodes).forEach(n=>{
+        if(n.nodeType===3 && n.textContent.trim()){
+          debug('Wrapping stray text');
+          const p = doc.createElement('p');
+          p.innerHTML = n.textContent.replace(/\n/g, '<br>');
+          p.style.color='#FFFFFF';
+          p.style.fontSize='18px';
+          p.style.marginBottom='16px';
+          p.style.lineHeight='1.5';
+          doc.body.replaceChild(p,n);
+        }
+      });
+      debug('Wrapped stray text');
+
+      const styleMap = {
+        H1: 'color:#78D5F1;font-size:28px;margin:24px 0 20px 0;line-height:1.2;',
+        H2: 'color:#78D5F1;font-size:28px;margin:24px 0 20px 0;line-height:1.2;',
+        H3: 'color:#FFFFFF;font-size:22px;font-weight:bold;margin:20px 0 16px 0;line-height:1.2;',
+        P:  'color:#FFFFFF;font-size:18px;line-height:1.5;margin-bottom:16px;white-space:pre-wrap;',
+        A:  'color:#00B3E3;text-decoration:underline;',
+        IMG:'max-width:100%;height:auto;display:block;margin:16px auto;',
+        UL: 'color:#FFFFFF;font-size:18px;margin-bottom:16px;padding-left:20px;',
+        OL: 'color:#FFFFFF;font-size:18px;margin-bottom:16px;padding-left:20px;',
+        LI: 'color:#FFFFFF;font-size:18px;margin-bottom:4px;line-height:1.5;',
+        TABLE:'border-collapse:collapse;width:100%;color:#FFFFFF;margin:16px 0;',
+        TD:   'border:1px solid #78D5F1;padding:8px;color:#FFFFFF;font-size:16px;',
+        TH:   'border:1px solid #78D5F1;padding:8px;color:#000000;font-size:16px;background:#78D5F1;font-weight:bold;'
+      };
+      Object.entries(styleMap).forEach(([tag, css])=>{
+        doc.querySelectorAll(tag).forEach(e => e.style.cssText += css);
+      });
+      debug('Applied styles');
+
+      const imgs = Array.from(doc.querySelectorAll('img'));
+      for(const img of imgs) {
+        const src = img.src;
+        if(src && !src.startsWith('data:')){
+          try{
+            const blob = await fetch(src).then(r=>r.blob());
+            const dataUrl = await new Promise(r=>{
+              const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(blob);
+            });
+            img.src = dataUrl; debug('Embedded image');
+          } catch(e){ debug('Image embed failed: '+e.message); }
+        }
+      }
+      debug('Embedded all images');
+
+      const finalHtml = doc.body.innerHTML.replace(/<p[^>]*>\s*<\/p>/gi, '');
+      document.getElementById('output').innerHTML = finalHtml;
+      debug('Conversion complete');
+    }
+
+    document.getElementById('convertBtn').addEventListener('click', convert);
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const out = document.getElementById('output');
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(out);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      try {
+        const ok = document.execCommand('copy');
+        debug(ok ? 'Copied to clipboard' : 'Copy command failed');
+      } catch(e) {
+        debug('Copy failed: '+e.message);
+      }
+      sel.removeAllRanges();
+    });
+  </script>
+</body>
+</html>
