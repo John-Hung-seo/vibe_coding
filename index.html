@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>VIVERSE Blog Converter v1.3</title>
   <style>
     :root {
       --primary: #78D5F1;
@@ -80,6 +81,7 @@
 </head>
 <body>
 
+
   <main>
     <div id="input" class="editor" contenteditable placeholder="Paste original content here..."></div>
     <div class="buttons">
@@ -93,7 +95,11 @@
     const debugEl = document.getElementById('debug');
     function debug(msg) {
       console.log(msg);
-      if (debugEl) debugEl.textContent += msg + '\n';
+      if (debugEl) {
+        debugEl.textContent += msg + '\n';
+        debugEl.scrollTop = debugEl.scrollHeight;
+      }
+
     }
     async function convert() {
       debug('Convert started');
