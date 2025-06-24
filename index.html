@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIVERSE Blog Converter v1.2</title>
+
   <style>
     :root {
       --primary: #78D5F1;
@@ -79,7 +79,7 @@
   </style>
 </head>
 <body>
-  <header>VIVERSE Blog Converter v1.2</header>
+
   <main>
     <div id="input" class="editor" contenteditable placeholder="Paste original content here..."></div>
     <div class="buttons">
@@ -191,6 +191,7 @@
     }
 
     document.getElementById('convertBtn').addEventListener('click', convert);
+
     document.getElementById('copyBtn').addEventListener('click', () => {
       const out = document.getElementById('output');
       const sel = window.getSelection();
@@ -205,6 +206,7 @@
         debug('Copy failed: '+e.message);
       }
       sel.removeAllRanges();
+
     });
   </script>
 </body>
